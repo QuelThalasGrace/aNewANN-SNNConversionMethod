@@ -288,3 +288,50 @@ def load_imagenet(root='/data/raid/floyed/ILSVRC2012', batch_size=128):
         num_workers=4, pin_memory=True)
 
     return train_loader, val_loader, train_dataset, val_dataset
+
+class AddNoise(object):
+    """
+    Args:
+        s(float): 噪声率
+        p (float): 执行该操作的概率
+    """
+
+    def __init__(self, s=0.5, p=0.9):
+        assert isinstance(s, float) or (isinstance(p, float))  # 判断输入参数格式是否正确
+        self.s = s
+        self.p = p
+
+    # transform 会调用该方法
+    def __call__(self, img):  # 使得类实例对象可以像调用普通函数那样，以“对象名()”的形式使用并执行对应的代码。
+        """
+       （PIL全称 Python Imaging Library，是 Python 平台一个功能非常强大而且简单易用的图像处理库。python3叫pillow）
+       Args:
+            img (PIL Image): PIL Image
+        Returns:
+            PIL Image: PIL image.
+        """
+        # 如果随机概率小于 seld.p，则执行 transform
+        if random.uniform(0, 1) < self.p:  # random.uniform(参数1，参数2) 返回参数1和参数2之间的任意值
+            # 把 image 转为 array
+            img_ = np.array(img).copy()
+            # 获得 shape，高*宽*通道数
+            h, w, c = img_.shape
+            # 信噪比
+            signal_pct = self.s
+            # 噪声的比例 = 1 -信噪比
+            noise_pct = (1 - self.s)
+            # 选择的值为 (0, 1, 2)，每个取值的概率分别为 [signal_pct, noise_pct/2., noise_pct/2.]
+            # 1 为白噪声，2 为 黑噪声
+            #numpy.random.choice(a, size=None, replace=True, p=None)解释
+            #从a(只要是ndarray都可以，但必须是一维的)中随机抽取数字，并组成指定大小(size)的数组
+            #replace:True表示可以取相同数字，False表示不可以取相同数字
+            #数组p：与数组a相对应，表示取数组a中每个元素的概率，默认为选取每个元素的概率相同。
+            mask = np.random.choice((0, 1, 2), size=(h, w, 1), p=[signal_pct, noise_pct / 2., noise_pct / 2.])
+            mask = np.repeat(mask, c, axis=2)
+            img_[mask == 1] = 255  # 白噪声
+            img_[mask == 2] = 0  # 黑噪声
+            # 再转换为 image
+            return Image.fromarray(img_.astype('uint8')).convert('RGB')
+        # 如果随机概率大于 seld.p，则直接返回原图
+        else:
+            return img
