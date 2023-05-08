@@ -44,4 +44,8 @@ test_transform = transforms.Compose(
          AddNoise(0.95,0.5),
          transforms.ToTensor(),
          transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                              std=[0.229, 0.224, 0.225])])
+                              std=[0.229, 0.224, 0.225])])  
+~~~                              
+ 
+ 
+ Taking care of the above, you can train ANNs based on the SteReLU activation function that perform well.
