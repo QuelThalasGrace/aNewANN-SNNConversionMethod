@@ -8,5 +8,6 @@ This is a project for our paper A New ANN-SNN Conversion Method with High Accura
 ### About the training process
 Our idea is mainly divided into two steps, the first step is to train the corresponding ANNs based on the StepReLU activation function, and the second step is to load the trained parameter files to the SNNs. For details of the StepReLU activation function, you can refer to the relevant code in the ann_NetStructure.py file.
 
+You can also experiment on other network structures, but we only provide the training process of the resnet18 network in the train.py file.
 ~~~python
 import numpy
